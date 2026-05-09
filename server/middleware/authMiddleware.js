@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
 import User from "../models/User.js"
 
-const protect = async (req, res, next) => {
+export const protect = async (req, res, next) => {
   let token
 
   if (
@@ -30,7 +30,7 @@ const protect = async (req, res, next) => {
   }
 }
 
-const admin = (req, res, next) => {
+export const admin = (req, res, next) => {
   try {
     if (req.user && req.user.role === "admin") {
       next()
