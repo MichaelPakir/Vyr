@@ -15,5 +15,7 @@ export const loginRequest = async (credentials) => {
 }
 
 export const logoutRequest = async () => {
-  return true
+  const response = await axios.post(`${API_URL}/logout`)
+
+  return response.data
 }

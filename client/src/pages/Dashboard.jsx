@@ -1,9 +1,12 @@
-import React from "react"
+import { useAuth } from "../contexts/AuthContext"
 
 const Dashboard = () => {
+  const { user } = useAuth()
+  const userName = user?.name
+
   return (
     <div>
-      <p>Welcome, ${user}!</p>
+      <p>Welcome, {userName}!</p>
     </div>
   )
 }
