@@ -14,11 +14,20 @@ const app = express()
 
 const server = createServer(app)
 
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173"
+const CLIENT_URLS = process.env.CLIENT_URLS || "http://localhost:5173"
+
+const allowedOrigins = (CLIENT_URLS || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean)
 
 const io = new Server(server, {
   cors: {
-    origin: CLIENT_URL,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true)
+      if (allowedOrigins.includes(origin)) return callback(null, true)
+      return callback(new Error("Not allowed by CORS"))
+    },
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -35,7 +44,11 @@ io.on("connection", (socket) => {
 setIO(io)
 
 const corsOptions = {
-  origin: CLIENT_URL,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true)
+    if (allowedOrigins.includes(origin)) return callback(null, true)
+    return callback(new Error("Not allowed by CORS"))
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true,
 }
