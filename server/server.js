@@ -53,6 +53,14 @@ const corsOptions = {
   credentials: true,
 }
 
+// Respond to Private Network preflight requests from browsers (Access-Control-Request-Private-Network)
+app.use((req, res, next) => {
+  if (req.headers["access-control-request-private-network"]) {
+    res.setHeader("Access-Control-Allow-Private-Network", "true")
+  }
+  next()
+})
+
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use("/api/auth", authRoutes)
