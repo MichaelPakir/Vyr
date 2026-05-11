@@ -14,10 +14,13 @@ const app = express()
 
 const server = createServer(app)
 
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173"
+
 const io = new Server(server, {
   cors: {
-    origin: "...",
+    origin: CLIENT_URL,
     methods: ["GET", "POST"],
+    credentials: true,
   },
 })
 
@@ -31,7 +34,13 @@ io.on("connection", (socket) => {
 
 setIO(io)
 
-app.use(cors())
+const corsOptions = {
+  origin: CLIENT_URL,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true,
+}
+
+app.use(cors(corsOptions))
 app.use(express.json())
 app.use("/api/auth", authRoutes)
 app.use("/api/tickets", ticketRoutes)
