@@ -50,11 +50,14 @@ export const protect = async (req, res, next) => {
 
 export const admin = (req, res, next) => {
   try {
-    if (req.user && req.user.role === "admin") {
-      next()
+    if (req.user && ["admin", "superadmin"].includes(req.user.role)) {
+      return next()
     }
+    return res.status(403).json({
+      message: "Not authorized as admin",
+    })
   } catch (error) {
-    req.status(403).json({
+    res.status(403).json({
       message: "Admin access only",
     })
   }

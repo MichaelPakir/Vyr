@@ -49,7 +49,7 @@ export const getMyTickets = async (req, res) => {
 
 export const getAllTickets = async (req, res) => {
   try {
-    if (req.user.role !== "admin") {
+    if (!["admin", "superadmin"].includes(req.user.role)) {
       return res.status(403).json({
         message: "Access denied",
       })

@@ -1,4 +1,5 @@
 import { useAuth } from "../contexts/AuthContext"
+import TicketList from "../components/tickets/TicketList"
 
 const Dashboard = () => {
   const { user } = useAuth()
@@ -6,11 +7,16 @@ const Dashboard = () => {
   const userRole = user?.role
 
   return (
-    <div>
+    <section>
       <p>
         Welcome, {userRole}: {userName}!
       </p>
-    </div>
+
+      <div>
+        <h1 className="text-2xl">Ticket Lists</h1>
+        <TicketList />
+      </div>
+    </section>
   )
 }
 
