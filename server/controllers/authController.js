@@ -1,4 +1,4 @@
-import User from "../models/user.js"
+import User from "../models/User.js"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 
@@ -88,4 +88,37 @@ const loginUser = async (req, res) => {
   }
 }
 
-export default { registerUser, loginUser }
+export const bootstrapSuperAdmin = async (req, res) => {
+  try {
+    const { email } = req.body
+
+    const user = await User.findOne({ email })
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      })
+    }
+
+    user.role = "superadmin"
+
+    await user.save()
+
+    res.status(201).json({
+      message:
+        "User is now a superadmin, give the madafaka a round of applause!",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    })
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    })
+  }
+}
+
+export default { registerUser, loginUser, bootstrapSuperAdmin }

@@ -1,6 +1,24 @@
 import jwt from "jsonwebtoken"
 import User from "../models/User.js"
 
+const roleAccess =
+  (...allowedRoles) =>
+  (req, res, next) => {
+    try {
+      if (req.user && allowedRoles.includes(req.user.role)) {
+        return next()
+      }
+
+      return res.status(403).json({
+        message: "Access denied",
+      })
+    } catch (error) {
+      return res.status(403).json({
+        message: "Access denied",
+      })
+    }
+  }
+
 export const protect = async (req, res, next) => {
   let token
 
@@ -38,6 +56,20 @@ export const admin = (req, res, next) => {
   } catch (error) {
     req.status(403).json({
       message: "Admin access only",
+    })
+  }
+}
+
+export const bootstrapSecret = (req, res, next) => {
+  const providedSecret = req.headers["x-bootstrap-secret"]
+  if (
+    process.env.SUPERADMIN_BOOTSTRAP_SECRET &&
+    providedSecret === process.env.SUPERADMIN_BOOTSTRAP_SECRET
+  ) {
+    return next()
+  } else {
+    return res.status(403).json({
+      message: "Invalid bootstrap secret",
     })
   }
 }
