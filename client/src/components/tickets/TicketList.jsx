@@ -63,7 +63,6 @@ const TicketList = () => {
   return (
     <section className="min-h-screen bg-slate-100 p-8">
       <div className="mx-auto max-w-5xl">
-        {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold text-slate-800">
@@ -79,7 +78,6 @@ const TicketList = () => {
           </button>
         </div>
 
-        {/* Tickets */}
         {loading ? (
           <div className="py-12 text-center text-slate-500">
             Loading tickets…
@@ -110,7 +108,6 @@ const TicketList = () => {
                     </span>
                   </div>
 
-                  {/* Content */}
                   <h2 className="mb-3 text-xl font-bold text-slate-800">
                     {ticket.title}
                   </h2>
@@ -119,7 +116,6 @@ const TicketList = () => {
                     {ticket.description}
                   </p>
 
-                  {/* Footer */}
                   <div className="flex items-center justify-between">
                     <button className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700">
                       View Details
