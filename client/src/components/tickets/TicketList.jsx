@@ -1,57 +1,89 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 import { API_BASE_URL } from "../../services/apiConfig"
+import TicketForm from "./TicketForm"
 
 const TicketList = () => {
   const [tickets, setTickets] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
 
   const { token, user } = useAuth()
 
-  useEffect(() => {
-    const fetchTickets = async () => {
-      if (!token) return
+  const fetchTickets = useCallback(async () => {
+    const endpoint =
+      user && ["admin", "superadmin"].includes(user.role)
+        ? `${API_BASE_URL}/api/tickets`
+        : `${API_BASE_URL}/api/tickets/my`
 
+    const res = await fetch(endpoint, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+
+    const isJson = (res.headers.get("content-type") || "").includes(
+      "application/json",
+    )
+
+    if (!res.ok) {
+      const errorBody = isJson ? await res.json() : await res.text()
+      throw new Error(errorBody.message || errorBody || `HTTP ${res.status}`)
+    }
+
+    const data = isJson ? await res.json() : {}
+    setTickets(data.tickets || [])
+  }, [token, user])
+
+  useEffect(() => {
+    if (!token) return
+
+    const load = async () => {
       try {
         setLoading(true)
         setError(null)
-
-        const endpoint =
-          user && ["admin", "superadmin"].includes(user.role)
-            ? `${API_BASE_URL}/api/tickets`
-            : `${API_BASE_URL}/api/tickets/my`
-
-        const res = await fetch(endpoint, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        })
-        const ct = res.headers.get("content-type") || ""
-        if (!res.ok) {
-          const errorBody = ct.includes("application/json")
-            ? await res.json()
-            : await res.text()
-          throw new Error(
-            errorBody.message || errorBody || `HTTP ${res.status}`,
-          )
-        }
-        const data = ct.includes("application/json")
-          ? await res.json()
-          : JSON.parse("{}")
-        console.log(res.status, ct, data)
-
-        setTickets(data.tickets || [])
-      } catch (err) {
-        setError(err.message)
+        await fetchTickets()
+      } catch (error) {
+        setError(error.message)
       } finally {
         setLoading(false)
       }
     }
 
-    fetchTickets()
-  }, [token, user])
+    load()
+  }, [token, fetchTickets])
+
+  const handleCreateTicket = async (ticketData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/tickets`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: ticketData.title,
+          description: ticketData.description,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to create ticket")
+      }
+
+      setIsFormOpen(false)
+
+      setLoading(true)
+      setError(null)
+      await fetchTickets()
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const statusColors = {
     Open: "bg-blue-100 text-blue-700",
@@ -68,15 +100,25 @@ const TicketList = () => {
             <h1 className="text-4xl font-bold text-slate-800">
               🎫 Support Tickets
             </h1>
+
             <p className="mt-2 text-slate-500">
               Organize and track incoming issues
             </p>
           </div>
 
-          <button className="rounded-xl bg-blue-600 px-5 py-3 font-medium text-white shadow-lg transition hover:bg-blue-700">
+          <button
+            onClick={() => setIsFormOpen(true)}
+            className="rounded-xl bg-blue-600 px-5 py-3 font-medium text-white shadow-lg transition hover:bg-blue-700"
+          >
             + New Ticket
           </button>
         </div>
+
+        <TicketForm
+          isFormOpen={isFormOpen}
+          onClose={() => setIsFormOpen(false)}
+          onSubmit={handleCreateTicket}
+        />
 
         {loading ? (
           <div className="py-12 text-center text-slate-500">
@@ -92,6 +134,7 @@ const TicketList = () => {
           <div className="grid gap-6 md:grid-cols-2">
             {tickets.map((ticket) => {
               const id = ticket._id || ticket.id
+
               return (
                 <div
                   key={id}
