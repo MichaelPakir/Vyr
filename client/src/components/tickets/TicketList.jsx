@@ -50,13 +50,7 @@ const TicketList = () => {
     }
 
     fetchTickets()
-  }, [token])
-
-  const priorityColors = {
-    High: "bg-red-100 text-red-700",
-    Medium: "bg-yellow-100 text-yellow-700",
-    Low: "bg-green-100 text-green-700",
-  }
+  }, [token, user])
 
   const statusColors = {
     Open: "bg-blue-100 text-blue-700",
@@ -104,21 +98,7 @@ const TicketList = () => {
                   key={id}
                   className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
                 >
-                  {/* Top badges */}
                   <div className="mb-4 flex items-center justify-between">
-                    {ticket.priority ? (
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                          priorityColors[ticket.priority] ||
-                          "bg-slate-100 text-slate-700"
-                        }`}
-                      >
-                        {ticket.priority}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-slate-400">&nbsp;</span>
-                    )}
-
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${
                         statusColors[ticket.status] ||
