@@ -30,10 +30,12 @@ const TicketList = () => {
 
     if (!res.ok) {
       const errorBody = isJson ? await res.json() : await res.text()
+
       throw new Error(errorBody.message || errorBody || `HTTP ${res.status}`)
     }
 
     const data = isJson ? await res.json() : {}
+
     setTickets(data.tickets || [])
   }, [token, user])
 
@@ -44,6 +46,7 @@ const TicketList = () => {
       try {
         setLoading(true)
         setError(null)
+
         await fetchTickets()
       } catch (error) {
         setError(error.message)
@@ -75,103 +78,237 @@ const TicketList = () => {
 
       setIsFormOpen(false)
 
-      setLoading(true)
-      setError(null)
       await fetchTickets()
     } catch (error) {
       setError(error.message)
-    } finally {
-      setLoading(false)
     }
   }
 
   const statusColors = {
-    Open: "bg-blue-100 text-blue-700",
-    Pending: "bg-purple-100 text-purple-700",
-    "In Progress": "bg-purple-100 text-purple-700",
-    Resolved: "bg-green-100 text-green-700",
+    Open: "border-blue-500/20 bg-blue-500/10 text-blue-300",
+
+    Pending: "border-yellow-500/20 bg-yellow-500/10 text-yellow-300",
+
+    "In Progress": "border-purple-500/20 bg-purple-500/10 text-purple-300",
+
+    Resolved: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
   }
 
   return (
-    <section className="min-h-screen bg-slate-100 p-8">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-slate-800">
-              🎫 Support Tickets
-            </h1>
+    <section className="space-y-8">
+      <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight text-white">
+            Tickets
+          </h2>
 
-            <p className="mt-2 text-slate-500">
-              Organize and track incoming issues
-            </p>
-          </div>
+          <p className="mt-2 text-zinc-400">
+            Track, organize, and manage support requests.
+          </p>
+        </div>
+
+        <button
+          onClick={() => setIsFormOpen(true)}
+          className="
+            rounded-xl
+            bg-white
+            px-5
+            py-3
+            text-sm
+            font-semibold
+            text-black
+            transition
+            hover:bg-zinc-200
+            active:scale-[0.98]
+          "
+        >
+          + Create Ticket
+        </button>
+      </div>
+
+      <TicketForm
+        isFormOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        onSubmit={handleCreateTicket}
+      />
+
+      {loading ? (
+        <div
+          className="
+            flex
+            h-60
+            items-center
+            justify-center
+            rounded-3xl
+            border
+            border-white/10
+            bg-zinc-900
+          "
+        >
+          <p className="text-zinc-400">Loading tickets...</p>
+        </div>
+      ) : error ? (
+        /* ERROR */
+        <div
+          className="
+            rounded-2xl
+            border
+            border-red-500/20
+            bg-red-500/10
+            p-6
+            text-red-300
+          "
+        >
+          {error}
+        </div>
+      ) : tickets.length === 0 ? (
+        /* EMPTY STATE */
+        <div
+          className="
+            flex
+            h-72
+            flex-col
+            items-center
+            justify-center
+            rounded-3xl
+            border
+            border-dashed
+            border-white/10
+            bg-zinc-900/50
+            text-center
+          "
+        >
+          <div className="text-5xl">🎫</div>
+
+          <h3 className="mt-5 text-xl font-semibold text-white">
+            No tickets yet
+          </h3>
+
+          <p className="mt-2 max-w-sm text-sm leading-relaxed text-zinc-400">
+            Create your first support ticket to start tracking issues and
+            requests.
+          </p>
 
           <button
             onClick={() => setIsFormOpen(true)}
-            className="rounded-xl bg-blue-600 px-5 py-3 font-medium text-white shadow-lg transition hover:bg-blue-700"
+            className="
+              mt-6
+              rounded-xl
+              border
+              border-white/10
+              bg-white/5
+              px-5
+              py-3
+              text-sm
+              font-medium
+              text-white
+              transition
+              hover:bg-white/10
+            "
           >
-            + New Ticket
+            Create First Ticket
           </button>
         </div>
+      ) : (
+        /* TICKET GRID */
+        <div className="grid gap-6 lg:grid-cols-2">
+          {tickets.map((ticket) => {
+            const id = ticket._id || ticket.id
 
-        <TicketForm
-          isFormOpen={isFormOpen}
-          onClose={() => setIsFormOpen(false)}
-          onSubmit={handleCreateTicket}
-        />
-
-        {loading ? (
-          <div className="py-12 text-center text-slate-500">
-            Loading tickets…
-          </div>
-        ) : error ? (
-          <div className="py-12 text-center text-red-600">{error}</div>
-        ) : tickets.length === 0 ? (
-          <div className="py-12 text-center text-slate-500">
-            No tickets yet.
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2">
-            {tickets.map((ticket) => {
-              const id = ticket._id || ticket.id
-
-              return (
-                <div
-                  key={id}
-                  className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-                >
-                  <div className="mb-4 flex items-center justify-between">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+            return (
+              <article
+                key={id}
+                className="
+                  group
+                  rounded-3xl
+                  border
+                  border-white/10
+                  bg-zinc-900
+                  p-6
+                  transition
+                  hover:border-white/20
+                  hover:bg-zinc-900/80
+                "
+              >
+                <div className="mb-5 flex items-start justify-between gap-4">
+                  <span
+                    className={`
+                      rounded-full
+                      border
+                      px-3
+                      py-1
+                      text-xs
+                      font-semibold
+                      ${
                         statusColors[ticket.status] ||
-                        "bg-slate-100 text-slate-700"
-                      }`}
-                    >
-                      {ticket.status}
+                        "border-white/10 bg-white/5 text-zinc-300"
+                      }
+                    `}
+                  >
+                    {ticket.status}
+                  </span>
+
+                  <span className="text-xs text-zinc-500">#{id}</span>
+                </div>
+
+                <h3
+                  className="
+                    text-xl
+                    font-semibold
+                    tracking-tight
+                    text-white
+                  "
+                >
+                  {ticket.title}
+                </h3>
+
+                <p
+                  className="
+                    mt-4
+                    line-clamp-3
+                    leading-relaxed
+                    text-zinc-400
+                  "
+                >
+                  {ticket.description}
+                </p>
+
+                <div className="mt-8 flex items-center justify-between">
+                  <button
+                    className="
+                      rounded-xl
+                      border
+                      border-white/10
+                      bg-white/5
+                      px-4
+                      py-2
+                      text-sm
+                      font-medium
+                      text-white
+                      transition
+                      hover:bg-white/10
+                    "
+                  >
+                    View Details
+                  </button>
+
+                  <div
+                    className="
+                      opacity-0
+                      transition
+                      group-hover:opacity-100
+                    "
+                  >
+                    <span className="text-sm text-zinc-500">
+                      Updated recently
                     </span>
                   </div>
-
-                  <h2 className="mb-3 text-xl font-bold text-slate-800">
-                    {ticket.title}
-                  </h2>
-
-                  <p className="mb-6 leading-relaxed text-slate-600">
-                    {ticket.description}
-                  </p>
-
-                  <div className="flex items-center justify-between">
-                    <button className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700">
-                      View Details
-                    </button>
-
-                    <p className="text-sm text-slate-400">Ticket #{id}</p>
-                  </div>
                 </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
+              </article>
+            )
+          })}
+        </div>
+      )}
     </section>
   )
 }

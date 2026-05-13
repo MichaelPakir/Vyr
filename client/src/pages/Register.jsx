@@ -1,68 +1,48 @@
-import { useState } from "react"
 import { useAuth } from "../contexts/AuthContext"
 import { useNavigate } from "react-router-dom"
+import CreateAccountForm from "../components/CreateAccountForm"
 
 const Register = () => {
   const { register } = useAuth()
   const navigate = useNavigate()
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  })
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
+  const handleRegister = async (formData) => {
     try {
       await register(formData)
 
       navigate("/login")
-
-      console.log(`Registered successfully ${JSON.stringify(formData)}`) // testing if register can now communicate with AuthContext
     } catch (error) {
       console.error(error)
     }
   }
+
   return (
-    <section>
-      <form onSubmit={handleSubmit}>
-        <input
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-        />
-
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-        />
-
-        <button type="submit">Register</button>
-      </form>
-    </section>
+    <CreateAccountForm
+      title="Create Account"
+      subtitle="Register to access your support dashboard."
+      buttonText="Create Account"
+      onSubmit={handleRegister}
+      fields={[
+        {
+          name: "name",
+          label: "Name",
+          type: "text",
+          placeholder: "John Doe",
+        },
+        {
+          name: "email",
+          label: "Email",
+          type: "email",
+          placeholder: "you@example.com",
+        },
+        {
+          name: "password",
+          label: "Password",
+          type: "password",
+          placeholder: "••••••••",
+        },
+      ]}
+    />
   )
 }
 

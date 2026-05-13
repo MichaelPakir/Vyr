@@ -1,58 +1,42 @@
-import { useState } from "react"
 import { useAuth } from "../contexts/AuthContext"
 import { useNavigate } from "react-router-dom"
+import CreateAccountForm from "../components/CreateAccountForm"
 
 const Login = () => {
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  })
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
+  const handleLogin = async (formData) => {
     try {
       await login(formData)
-      navigate("/dashboard")
 
-      console.log("Logged in successfully")
+      navigate("/dashboard")
     } catch (error) {
       console.error(error)
     }
   }
 
   return (
-    <section>
-      <form onSubmit={handleSubmit}>
-        <input
-          name="email"
-          placeholder="Email"
-          type="email"
-          onChange={handleChange}
-        />
-
-        <input
-          name="password"
-          placeholder="Password"
-          type="password"
-          onChange={handleChange}
-        />
-
-        <button type="submit">Login</button>
-      </form>
-    </section>
+    <CreateAccountForm
+      title="Welcome Back"
+      subtitle="Login to continue managing tickets."
+      buttonText="Login"
+      onSubmit={handleLogin}
+      fields={[
+        {
+          name: "email",
+          label: "Email",
+          type: "email",
+          placeholder: "you@example.com",
+        },
+        {
+          name: "password",
+          label: "Password",
+          type: "password",
+          placeholder: "••••••••",
+        },
+      ]}
+    />
   )
 }
 
