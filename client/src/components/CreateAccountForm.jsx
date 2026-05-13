@@ -30,28 +30,8 @@ const CreateAccountForm = ({
   }
 
   return (
-    <section
-      className="
-        flex
-        min-h-screen
-        items-center
-        justify-center
-        bg-zinc-950
-        px-6
-      "
-    >
-      <div
-        className="
-          w-full
-          max-w-md
-          rounded-3xl
-          border
-          border-white/10
-          bg-zinc-900
-          p-8
-          shadow-2xl
-        "
-      >
+    <section className="flex min-h-screen items-center justify-center bg-zinc-950 px-6">
+      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-zinc-900 p-8 shadow-2xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight text-white">
             {title}
@@ -73,39 +53,14 @@ const CreateAccountForm = ({
                 placeholder={field.placeholder}
                 value={formData[field.name]}
                 onChange={handleChange}
-                className="
-                  w-full
-                  rounded-2xl
-                  border
-                  border-white/10
-                  bg-zinc-950
-                  px-4
-                  py-4
-                  text-white
-                  outline-none
-                  transition
-                  placeholder:text-zinc-500
-                  focus:border-white/30
-                  focus:bg-zinc-900
-                "
+                className="w-full rounded-2xl border border-white/10 bg-zinc-950 px-4 py-4 text-white outline-none transition placeholder:text-zinc-500 focus:border-white/30 focus:bg-zinc-900"
               />
             </div>
           ))}
 
           <button
             type="submit"
-            className="
-              w-full
-              rounded-2xl
-              bg-white
-              px-5
-              py-4
-              font-semibold
-              text-black
-              transition
-              hover:bg-zinc-200
-              active:scale-[0.99]
-            "
+            className="w-full rounded-2xl bg-white px-5 py-4 font-semibold text-black transition hover:bg-zinc-200 active:scale-[0.99]"
           >
             {buttonText}
           </button>

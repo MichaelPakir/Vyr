@@ -6,6 +6,7 @@ import Home from "./pages/Home"
 import MainLayout from "./layouts/MainLayout"
 import Dashboard from "./pages/Dashboard"
 import ProtectedRoutes from "./routes/ProtectedRoutes"
+import TicketDetails from "./components/tickets/TicketDetails"
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
 
         <Route element={<ProtectedRoutes />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/ticket-details/:id" element={<TicketDetails />} />
         </Route>
       </Route>
     </Routes>

@@ -19,31 +19,8 @@ const TicketForm = ({ isFormOpen, onSubmit, onClose }) => {
   if (!isFormOpen) return null
 
   return (
-    <div
-      className="
-        fixed
-        inset-0
-        z-50
-        flex
-        items-center
-        justify-center
-        bg-black/60
-        p-4
-        backdrop-blur-sm
-      "
-    >
-      <section
-        className="
-          w-full
-          max-w-2xl
-          rounded-3xl
-          border
-          border-white/10
-          bg-zinc-950
-          p-8
-          shadow-2xl
-        "
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <section className="w-full max-w-2xl rounded-3xl border border-white/10 bg-zinc-950 p-8 shadow-2xl">
         <div className="mb-8">
           <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">
             Support Ticket
@@ -69,21 +46,7 @@ const TicketForm = ({ isFormOpen, onSubmit, onClose }) => {
               placeholder="Payment gateway issue..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="
-                w-full
-                rounded-2xl
-                border
-                border-white/10
-                bg-zinc-900
-                px-4
-                py-4
-                text-white
-                outline-none
-                transition
-                placeholder:text-zinc-500
-                focus:border-white/30
-                focus:bg-zinc-800
-              "
+              className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-4 text-white outline-none transition placeholder:text-zinc-500 focus:border-white/30 focus:bg-zinc-800"
             />
           </div>
 
@@ -97,22 +60,7 @@ const TicketForm = ({ isFormOpen, onSubmit, onClose }) => {
               placeholder="Explain the issue in detail..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="
-                w-full
-                resize-none
-                rounded-2xl
-                border
-                border-white/10
-                bg-zinc-900
-                px-4
-                py-4
-                text-white
-                outline-none
-                transition
-                placeholder:text-zinc-500
-                focus:border-white/30
-                focus:bg-zinc-800
-              "
+              className="w-full resize-none rounded-2xl border border-white/10 bg-zinc-900 px-4 py-4 text-white outline-none transition placeholder:text-zinc-500 focus:border-white/30 focus:bg-zinc-800"
             />
           </div>
 
@@ -120,37 +68,14 @@ const TicketForm = ({ isFormOpen, onSubmit, onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="
-                rounded-xl
-                border
-                border-white/10
-                bg-white/5
-                px-5
-                py-3
-                text-sm
-                font-medium
-                text-white
-                transition
-                hover:bg-white/10
-              "
+              className="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              className="
-                rounded-xl
-                bg-white
-                px-5
-                py-3
-                text-sm
-                font-semibold
-                text-black
-                transition
-                hover:bg-zinc-200
-                active:scale-[0.98]
-              "
+              className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200 active:scale-[0.98]"
             >
               Create Ticket
             </button>

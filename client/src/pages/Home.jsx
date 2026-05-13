@@ -12,27 +12,11 @@ const Home = () => {
               Modern Support Platform
             </p>
 
-            <h1
-              className="
-                text-5xl
-                font-bold
-                leading-tight
-                tracking-tight
-                md:text-7xl
-              "
-            >
+            <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-7xl">
               Manage support tickets with clarity and speed.
             </h1>
 
-            <p
-              className="
-                mt-8
-                max-w-2xl
-                text-lg
-                leading-relaxed
-                text-zinc-400
-              "
-            >
+            <p className="mt-8 max-w-2xl text-lg leading-relaxed text-zinc-400">
               A streamlined ticket management platform built for teams that
               value organization, efficiency, and exceptional support workflows.
             </p>
@@ -42,37 +26,11 @@ const Home = () => {
                 <></>
               ) : (
                 <>
-                  <Link
-                    to="/register"
-                    className="
-                  rounded-2xl
-                  bg-white
-                  px-6
-                  py-4
-                  font-semibold
-                  text-black
-                  transition
-                  hover:bg-zinc-200
-                "
-                  >
+                  <Link to="/register" className="rounded-2xl bg-white px-6 py-4 font-semibold text-black transition hover:bg-zinc-200">
                     Get Started
                   </Link>
 
-                  <Link
-                    to="/login"
-                    className="
-                  rounded-2xl
-                  border
-                  border-white/10
-                  bg-white/5
-                  px-6
-                  py-4
-                  font-semibold
-                  text-white
-                  transition
-                  hover:bg-white/10
-                "
-                  >
+                  <Link to="/login" className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 font-semibold text-white transition hover:bg-white/10">
                     Login
                   </Link>
                 </>
@@ -81,18 +39,7 @@ const Home = () => {
           </div>
         </div>
 
-        <div
-          className="
-            absolute
-            right-[-200px]
-            top-[-200px]
-            h-[500px]
-            w-[500px]
-            rounded-full
-            bg-blue-500/10
-            blur-3xl
-          "
-        />
+        <div className="absolute -right-50 -top-50 h-125 w-125 rounded-full bg-blue-500/10 blur-3xl" />
       </section>
 
       <section className="border-t border-white/10">
@@ -125,19 +72,7 @@ const Home = () => {
                 desc: "Track performance and response metrics.",
               },
             ].map((feature) => (
-              <div
-                key={feature.title}
-                className="
-                  rounded-3xl
-                  border
-                  border-white/10
-                  bg-zinc-900
-                  p-8
-                  transition
-                  hover:border-white/20
-                  hover:bg-zinc-900/70
-                "
-              >
+              <div key={feature.title} className="rounded-3xl border border-white/10 bg-zinc-900 p-8 transition hover:border-white/20 hover:bg-zinc-900/70">
                 <div className="text-4xl">{feature.icon}</div>
 
                 <h3 className="mt-6 text-2xl font-semibold">{feature.title}</h3>
