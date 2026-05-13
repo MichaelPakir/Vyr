@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
 
 const Home = () => {
+  const { user } = useAuth()
   return (
     <>
       <section className="relative overflow-hidden">
@@ -36,9 +38,13 @@ const Home = () => {
             </p>
 
             <div className="mt-10 flex flex-wrap gap-4">
-              <Link
-                to="/register"
-                className="
+              {user ? (
+                <></>
+              ) : (
+                <>
+                  <Link
+                    to="/register"
+                    className="
                   rounded-2xl
                   bg-white
                   px-6
@@ -48,13 +54,13 @@ const Home = () => {
                   transition
                   hover:bg-zinc-200
                 "
-              >
-                Get Started
-              </Link>
+                  >
+                    Get Started
+                  </Link>
 
-              <Link
-                to="/login"
-                className="
+                  <Link
+                    to="/login"
+                    className="
                   rounded-2xl
                   border
                   border-white/10
@@ -66,9 +72,11 @@ const Home = () => {
                   transition
                   hover:bg-white/10
                 "
-              >
-                Login
-              </Link>
+                  >
+                    Login
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
