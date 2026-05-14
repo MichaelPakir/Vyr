@@ -20,7 +20,7 @@ const TicketDetails = () => {
     },
     {
       id: 2,
-      user: "John Doe",
+      user: "Juan Dela Cruz",
       message: "Thanks, this is blocking my login.",
       createdAt: "1h ago",
       role: "user",

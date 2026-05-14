@@ -27,7 +27,7 @@ const Register = () => {
           name: "name",
           label: "Name",
           type: "text",
-          placeholder: "John Doe",
+          placeholder: "Juan Dela Cruz",
         },
         {
           name: "email",
