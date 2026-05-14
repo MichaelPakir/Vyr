@@ -1,8 +1,8 @@
-import Comment from "./../models/Comment"
-import Ticket from "../models/Ticket"
+import Comment from "./../models/Comment.js"
+import Ticket from "../models/Ticket.js"
 import { getIO } from "../socket.js"
 
-const addComment = async (req, res) => {
+export const addComment = async (req, res) => {
   const { ticketId } = req.params
   const { message } = req.body
 
@@ -22,25 +22,41 @@ const addComment = async (req, res) => {
 
     const comment = new Comment({
       message,
-      ticketId,
+      ticket: ticketId,
       author: req.user._id,
     })
 
     await comment.save()
 
+    const populatedComment = await Comment.findById(comment._id).populate(
+      "author",
+      "name role",
+    )
+
     const io = getIO()
-    io.emit("newComment", {
-      id: comment._id,
-      message: comment.message,
-      ticketId: comment.ticketId,
-      author: comment.author,
-      createdAt: comment.createdAt,
-    })
+
+    io.emit("newComment", populatedComment)
 
     return res.status(201).json({
       message: "Comment created",
-      comment,
+      comment: populatedComment,
     })
+  } catch (error) {
+    return res.status(500).json({
+      message: "Server error",
+    })
+  }
+}
+
+export const getCommentsByTicket = async (req, res) => {
+  const { ticketId } = req.params
+
+  try {
+    const comments = await Comment.find({ ticket: ticketId })
+      .populate("author", "name role")
+      .sort({ createdAt: 1 })
+
+    return res.status(200).json(comments)
   } catch (error) {
     return res.status(500).json({
       message: "Server error",
