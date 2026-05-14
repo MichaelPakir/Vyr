@@ -7,17 +7,22 @@ import {
   getTicketById,
 } from "../controllers/ticketController.js"
 
+import {
+  addComment,
+  getCommentsByTicket,
+} from "../controllers/commentController.js"
+
 import { admin, protect } from "../middleware/authMiddleware.js"
 
 const router = express.Router()
 
-//user routes
 router.post("/", protect, createTicket)
 router.get("/my", protect, getMyTickets)
 router.get("/:id", protect, getTicketById)
-
-//admin routes
 router.get("/", protect, admin, getAllTickets)
 router.put("/:id", protect, admin, updateTicketStatus)
+
+router.post("/:ticketId/comments", protect, addComment)
+router.get("/:ticketId/comments", protect, getCommentsByTicket)
 
 export default router
