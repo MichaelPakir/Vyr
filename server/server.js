@@ -1,6 +1,7 @@
 import dotenv from "dotenv"
 import authRoutes from "./routes/authRoutes.js"
 import ticketRoutes from "./routes/ticketRoutes.js"
+import usersRoutes from "./routes/usersRoutes.js"
 import { createServer } from "http"
 import { Server } from "socket.io"
 import { setIO } from "./socket.js"
@@ -65,6 +66,7 @@ app.use(cors(corsOptions))
 app.use(express.json())
 app.use("/api/auth", authRoutes)
 app.use("/api/tickets", ticketRoutes)
+app.use("/api/users", usersRoutes)
 
 app.get("/", (req, res) => {
   res.send("API is running")

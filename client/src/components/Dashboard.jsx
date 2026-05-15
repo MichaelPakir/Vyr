@@ -21,18 +21,6 @@ const Dashboard = () => {
               Manage and monitor support tickets efficiently.
             </p>
           </div>
-
-          <div className="flex gap-4">
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
-              <p className="text-sm text-zinc-400">Role</p>
-              <p className="mt-1 font-semibold capitalize">{user?.role}</p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
-              <p className="text-sm text-zinc-400">Status</p>
-              <p className="mt-1 font-semibold text-emerald-400">Active</p>
-            </div>
-          </div>
         </div>
 
         <TicketList />

@@ -47,6 +47,15 @@ const Header = () => {
                 Dashboard
               </Link>
             )}
+
+            {["admin", "superadmin"].includes(user?.role) && (
+              <Link
+                to={"/users"}
+                className="rounded-xl px-4 py-2 text-sm font-medium text-zinc-400 transition hover:bg-white/5 hover:text-white"
+              >
+                Users
+              </Link>
+            )}
           </nav>
         </div>
 
