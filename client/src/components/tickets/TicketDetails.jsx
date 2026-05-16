@@ -21,9 +21,12 @@ const TicketDetails = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedImage, setSelectedImage] = useState(null)
+  const [showNewRepliesIndicator, setShowNewRepliesIndicator] = useState(false)
 
   const replyTextareaRef = useRef(null)
   const commentsEndRef = useRef(null)
+  const isNearBottomRef = useRef(true)
+  const hasInitialScrollRef = useRef(false)
 
   const normalizeRole = (role) => role?.toLowerCase().trim()
 
@@ -82,7 +85,16 @@ const TicketDetails = () => {
       }
 
       const data = await res.json()
-      setComments(data)
+      setComments((prev) => {
+        const prevIds = prev.map((comment) => comment._id).join("|")
+        const nextIds = data.map((comment) => comment._id).join("|")
+
+        if (prevIds === nextIds) {
+          return prev
+        }
+
+        return data
+      })
     } catch (error) {
       console.error(error)
     }
@@ -109,6 +121,31 @@ const TicketDetails = () => {
       clearInterval(intervalId)
     }
   }, [fetchComments, token])
+
+  useEffect(() => {
+    const updateNearBottomState = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop
+      const viewportHeight = window.innerHeight
+      const documentHeight = document.documentElement.scrollHeight
+      const distanceFromBottom = documentHeight - (scrollTop + viewportHeight)
+
+      const nearBottom = distanceFromBottom < 160
+      isNearBottomRef.current = nearBottom
+
+      if (nearBottom) {
+        setShowNewRepliesIndicator(false)
+      }
+    }
+
+    updateNearBottomState()
+    window.addEventListener("scroll", updateNearBottomState, { passive: true })
+    window.addEventListener("resize", updateNearBottomState)
+
+    return () => {
+      window.removeEventListener("scroll", updateNearBottomState)
+      window.removeEventListener("resize", updateNearBottomState)
+    }
+  }, [])
 
   useEffect(() => {
     if (!token) return
@@ -152,10 +189,26 @@ const TicketDetails = () => {
   useEffect(() => {
     if (!comments.length) return
 
-    commentsEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    })
+    const scrollToLatest = () => {
+      commentsEndRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      })
+    }
+
+    if (!hasInitialScrollRef.current) {
+      hasInitialScrollRef.current = true
+      scrollToLatest()
+      return
+    }
+
+    if (isNearBottomRef.current) {
+      scrollToLatest()
+      setShowNewRepliesIndicator(false)
+      return
+    }
+
+    setShowNewRepliesIndicator(true)
   }, [comments])
 
   const isAdminView = user?.role === "admin" || user?.role === "superadmin"
@@ -210,6 +263,14 @@ const TicketDetails = () => {
     }
   }
 
+  const handleJumpToLatest = () => {
+    commentsEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    })
+    setShowNewRepliesIndicator(false)
+  }
+
   if (loading) {
     return (
       <main className="min-h-screen bg-zinc-950 text-white">
@@ -258,6 +319,21 @@ const TicketDetails = () => {
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <div className="mx-auto max-w-4xl px-6 py-10">
+        {showNewRepliesIndicator && (
+          <button
+            type="button"
+            onClick={handleJumpToLatest}
+            className="group fixed bottom-6 left-1/2 z-40 -translate-x-1/2 rounded-full border border-white/15 bg-zinc-950/90 px-5 py-3 text-sm font-semibold text-white shadow-2xl shadow-black/40 backdrop-blur-md transition duration-200 hover:-translate-y-1 hover:bg-zinc-900 hover:shadow-black/60"
+          >
+            <span className="flex items-center gap-2">
+              <span className="text-lg leading-none transition-transform duration-200 group-hover:translate-y-0.5">
+                ↓
+              </span>
+              <span>New replies</span>
+            </span>
+          </button>
+        )}
+
         <div className="mb-10 border-b border-white/10 pb-8">
           <p className="text-sm uppercase tracking-widest text-zinc-500">
             Ticket Details
