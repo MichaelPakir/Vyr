@@ -6,6 +6,7 @@ import {
   useState,
 } from "react"
 import { useNavigate, useParams } from "react-router-dom"
+import { io } from "socket.io-client"
 import { useAuth } from "../../contexts/AuthContext"
 import { API_BASE_URL } from "../../services/apiConfig"
 
@@ -20,13 +21,15 @@ const TicketDetails = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedImage, setSelectedImage] = useState(null)
+
   const replyTextareaRef = useRef(null)
+  const commentsEndRef = useRef(null)
 
   const normalizeRole = (role) => role?.toLowerCase().trim()
 
   const isAdminRole = (role) => {
-    const r = normalizeRole(role)
-    return r === "admin" || r === "superadmin"
+    const normalizedRole = normalizeRole(role)
+    return normalizedRole === "admin" || normalizedRole === "superadmin"
   }
 
   const fetchTicket = useCallback(async () => {
@@ -87,12 +90,55 @@ const TicketDetails = () => {
 
   useEffect(() => {
     if (!token) return
+
     const loadTicketData = async () => {
       await Promise.all([fetchTicket(), fetchComments()])
     }
 
     void loadTicketData()
   }, [fetchTicket, fetchComments, token])
+
+  useEffect(() => {
+    if (!token) return
+
+    const intervalId = setInterval(() => {
+      void fetchComments()
+    }, 5000)
+
+    return () => {
+      clearInterval(intervalId)
+    }
+  }, [fetchComments, token])
+
+  useEffect(() => {
+    if (!token) return
+
+    const socket = io(API_BASE_URL, {
+      transports: ["websocket"],
+      auth: { token },
+    })
+
+    socket.on("newComment", (incomingComment) => {
+      const incomingTicketId =
+        incomingComment.ticket?._id || incomingComment.ticket
+
+      if (incomingTicketId?.toString() !== id) return
+
+      setComments((prev) => {
+        if (prev.some((comment) => comment._id === incomingComment._id)) {
+          return prev
+        }
+
+        return [...prev, incomingComment].sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+        )
+      })
+    })
+
+    return () => {
+      socket.disconnect()
+    }
+  }, [id, token])
 
   useLayoutEffect(() => {
     const textarea = replyTextareaRef.current
@@ -103,12 +149,23 @@ const TicketDetails = () => {
     textarea.style.height = `${nextHeight}px`
   }, [draftMessage])
 
+  useEffect(() => {
+    if (!comments.length) return
+
+    commentsEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    })
+  }, [comments])
+
   const isAdminView = user?.role === "admin" || user?.role === "superadmin"
 
   const isOwnMessage = (role) => {
-    const r = normalizeRole(role)
+    const normalizedRole = normalizeRole(role)
 
-    return isAdminView ? r === "user" : r === "admin" || r === "superadmin"
+    return isAdminView
+      ? normalizedRole === "user"
+      : normalizedRole === "admin" || normalizedRole === "superadmin"
   }
 
   const handleSendComment = async (e) => {
@@ -134,7 +191,16 @@ const TicketDetails = () => {
       const data = await res.json()
       const savedComment = data.comment
 
-      setComments((prev) => [...prev, savedComment])
+      setComments((prev) => {
+        if (prev.some((comment) => comment._id === savedComment._id)) {
+          return prev
+        }
+
+        return [...prev, savedComment].sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+        )
+      })
+
       setDraftMessage("")
       if (replyTextareaRef.current) {
         replyTextareaRef.current.style.height = "96px"
@@ -246,10 +312,11 @@ const TicketDetails = () => {
                         className="h-32 w-full object-cover"
                       />
                       <button
+                        type="button"
                         onClick={() =>
                           setSelectedImage(`${API_BASE_URL}${att.url}`)
                         }
-                        className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition group-hover:opacity-100 cursor-pointer"
+                        className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 transition group-hover:opacity-100"
                       >
                         <span className="text-sm font-medium text-white">
                           View
@@ -282,9 +349,7 @@ const TicketDetails = () => {
               return (
                 <div
                   key={comment._id}
-                  className={`flex ${
-                    isRight ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex ${isRight ? "justify-end" : "justify-start"}`}
                 >
                   <div
                     className={`w-fit max-w-[70%] rounded-2xl border p-4 ${
@@ -313,6 +378,7 @@ const TicketDetails = () => {
                 </div>
               )
             })}
+            <div ref={commentsEndRef} />
           </div>
         </div>
 
@@ -351,6 +417,7 @@ const TicketDetails = () => {
             className="relative max-h-[90vh] max-w-4xl"
           >
             <button
+              type="button"
               onClick={() => setSelectedImage(null)}
               className="absolute -top-10 right-0 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
             >
