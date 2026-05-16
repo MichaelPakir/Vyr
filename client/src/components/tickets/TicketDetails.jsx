@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import { API_BASE_URL } from "../../services/apiConfig"
@@ -14,6 +20,7 @@ const TicketDetails = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedImage, setSelectedImage] = useState(null)
+  const replyTextareaRef = useRef(null)
 
   const normalizeRole = (role) => role?.toLowerCase().trim()
 
@@ -80,9 +87,21 @@ const TicketDetails = () => {
 
   useEffect(() => {
     if (!token) return
-    fetchTicket()
-    fetchComments()
+    const loadTicketData = async () => {
+      await Promise.all([fetchTicket(), fetchComments()])
+    }
+
+    void loadTicketData()
   }, [fetchTicket, fetchComments, token])
+
+  useLayoutEffect(() => {
+    const textarea = replyTextareaRef.current
+    if (!textarea) return
+
+    textarea.style.height = "0px"
+    const nextHeight = Math.min(textarea.scrollHeight, 240)
+    textarea.style.height = `${nextHeight}px`
+  }, [draftMessage])
 
   const isAdminView = user?.role === "admin" || user?.role === "superadmin"
 
@@ -117,6 +136,9 @@ const TicketDetails = () => {
 
       setComments((prev) => [...prev, savedComment])
       setDraftMessage("")
+      if (replyTextareaRef.current) {
+        replyTextareaRef.current.style.height = "96px"
+      }
     } catch (err) {
       console.error(err)
     }
@@ -180,6 +202,20 @@ const TicketDetails = () => {
           <p className="mt-3 text-zinc-400">
             Full information about this support request.
           </p>
+          <div className="mt-4 flex flex-wrap gap-4 text-sm text-zinc-400">
+            {ticket.createdBy && (
+              <div>
+                <span className="font-medium text-zinc-300">Created by:</span>{" "}
+                {ticket.createdBy.name}
+              </div>
+            )}
+            {ticket.createdAt && (
+              <div>
+                <span className="font-medium text-zinc-300">Created:</span>{" "}
+                {new Date(ticket.createdAt).toLocaleString()}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
@@ -285,10 +321,12 @@ const TicketDetails = () => {
           className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4"
         >
           <textarea
+            ref={replyTextareaRef}
             value={draftMessage}
             onChange={(e) => setDraftMessage(e.target.value)}
             placeholder="Write a reply..."
-            className="h-24 w-full resize-none bg-transparent text-sm text-white outline-none"
+            rows={4}
+            className="w-full resize-none overflow-y-auto bg-transparent text-sm text-white outline-none"
           />
 
           <div className="mt-3 flex justify-end">

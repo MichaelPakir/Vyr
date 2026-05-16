@@ -92,7 +92,10 @@ export const getTicketById = async (req, res) => {
       })
     }
 
-    const ticket = await Ticket.findById(id)
+    const ticket = await Ticket.findById(id).populate(
+      "createdBy",
+      "name email role",
+    )
 
     if (!ticket) {
       return res.status(404).json({
@@ -101,7 +104,8 @@ export const getTicketById = async (req, res) => {
     }
 
     // Check authorization: only creator or admin can view
-    const isCreator = ticket.createdBy.toString() === req.user._id.toString()
+    const isCreator =
+      ticket.createdBy._id.toString() === req.user._id.toString()
     const isAdmin = ["admin", "superadmin"].includes(req.user.role)
 
     if (!isCreator && !isAdmin) {
