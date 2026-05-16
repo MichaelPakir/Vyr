@@ -14,7 +14,6 @@ export const getUsers = async (req, res) => {
 
 export const promoteUser = async (req, res) => {
   try {
-    // only allow superadmins to perform this action
     if (!req.user || req.user.role !== "superadmin") {
       return res.status(403).json({ message: "Access denied" })
     }
@@ -48,7 +47,6 @@ export const promoteUser = async (req, res) => {
 
 export const demoteUser = async (req, res) => {
   try {
-    // only allow superadmins to perform this action
     if (!req.user || req.user.role !== "superadmin") {
       return res.status(403).json({ message: "Access denied" })
     }

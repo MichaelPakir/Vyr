@@ -32,7 +32,6 @@ const Users = () => {
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <div className="mx-auto max-w-7xl px-6 py-10">
-        {/* Header (matched to Dashboard) */}
         <div className="mb-10 flex flex-col gap-4 border-b border-white/10 pb-8 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm uppercase tracking-widest text-zinc-500">
@@ -47,7 +46,6 @@ const Users = () => {
           </div>
         </div>
 
-        {/* Content */}
         {loading && <p className="text-zinc-400">Loading users...</p>}
 
         {error && <p className="text-red-400">{error}</p>}

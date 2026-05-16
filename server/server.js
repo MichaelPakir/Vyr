@@ -54,7 +54,6 @@ const corsOptions = {
   credentials: true,
 }
 
-// Respond to Private Network preflight requests from browsers (Access-Control-Request-Private-Network)
 app.use((req, res, next) => {
   if (req.headers["access-control-request-private-network"]) {
     res.setHeader("Access-Control-Allow-Private-Network", "true")
@@ -64,8 +63,8 @@ app.use((req, res, next) => {
 
 app.use(cors(corsOptions))
 app.use(express.json())
-// serve uploaded files
-app.use('/uploads', express.static('uploads'))
+
+app.use("/uploads", express.static("uploads"))
 app.use("/api/auth", authRoutes)
 app.use("/api/tickets", ticketRoutes)
 app.use("/api/users", usersRoutes)

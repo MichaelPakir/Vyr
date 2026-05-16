@@ -71,7 +71,6 @@ const TicketList = () => {
 
       if (ticketData instanceof FormData) {
         opts.body = ticketData
-        // let browser set Content-Type with boundary
       } else {
         opts.headers["Content-Type"] = "application/json"
         opts.body = JSON.stringify({

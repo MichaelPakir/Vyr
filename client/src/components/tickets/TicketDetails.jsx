@@ -482,7 +482,6 @@ const TicketDetails = () => {
         </form>
       </div>
 
-      {/* Image Preview Modal */}
       {selectedImage && (
         <div
           onClick={() => setSelectedImage(null)}

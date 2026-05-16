@@ -19,7 +19,6 @@ import { admin, protect } from "../middleware/authMiddleware.js"
 
 const router = express.Router()
 
-// ensure uploads folder exists
 const uploadsDir = path.resolve("uploads")
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true })
@@ -37,7 +36,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage })
 
-// allow attachments under the `attachments` field
 router.post("/", protect, upload.array("attachments", 6), createTicket)
 router.get("/my", protect, getMyTickets)
 router.get("/:id", protect, getTicketById)

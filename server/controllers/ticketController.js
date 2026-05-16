@@ -18,7 +18,6 @@ export const createTicket = async (req, res) => {
       createdBy: req.user._id,
     }
 
-    // attach uploaded files metadata if any
     if (req.files && req.files.length > 0) {
       ticketData.attachments = req.files.map((f) => ({
         filename: f.filename,
@@ -103,7 +102,6 @@ export const getTicketById = async (req, res) => {
       })
     }
 
-    // Check authorization: only creator or admin can view
     const isCreator =
       ticket.createdBy._id.toString() === req.user._id.toString()
     const isAdmin = ["admin", "superadmin"].includes(req.user.role)

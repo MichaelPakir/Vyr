@@ -9,7 +9,7 @@ const TicketForm = ({ isFormOpen, onSubmit, onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // build FormData to include attachments
+
     const formData = new FormData()
     formData.append("title", title)
     formData.append("description", description)
@@ -45,7 +45,7 @@ const TicketForm = ({ isFormOpen, onSubmit, onClose }) => {
   const handleFileChange = (e) => {
     const selected = Array.from(e.target.files || [])
     if (selected.length) setFiles((prev) => [...prev, ...selected])
-    // reset input so same file can be added again if needed
+
     e.target.value = null
   }
 
@@ -123,7 +123,9 @@ const TicketForm = ({ isFormOpen, onSubmit, onClose }) => {
                 Select images
               </button>
 
-              <span className="text-sm text-zinc-500">or paste image (Ctrl+V)</span>
+              <span className="text-sm text-zinc-500">
+                or paste image (Ctrl+V)
+              </span>
             </div>
 
             {files.length > 0 && (
