@@ -13,6 +13,7 @@ const TicketDetails = () => {
   const [draftMessage, setDraftMessage] = useState("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [selectedImage, setSelectedImage] = useState(null)
 
   const normalizeRole = (role) => role?.toLowerCase().trim()
 
@@ -190,6 +191,50 @@ const TicketDetails = () => {
           </p>
         </div>
 
+        {ticket.attachments && ticket.attachments.length > 0 && (
+          <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-6">
+            <p className="text-sm uppercase tracking-widest text-zinc-500">
+              Attachments
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+              {ticket.attachments.map((att, idx) => (
+                <div
+                  key={idx}
+                  className="group relative overflow-hidden rounded-xl border border-white/10 bg-zinc-800"
+                >
+                  {att.mimetype?.startsWith("image/") ? (
+                    <>
+                      <img
+                        src={`${API_BASE_URL}${att.url}`}
+                        alt={att.filename}
+                        className="h-32 w-full object-cover"
+                      />
+                      <button
+                        onClick={() =>
+                          setSelectedImage(`${API_BASE_URL}${att.url}`)
+                        }
+                        className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition group-hover:opacity-100 cursor-pointer"
+                      >
+                        <span className="text-sm font-medium text-white">
+                          View
+                        </span>
+                      </button>
+                    </>
+                  ) : (
+                    <a
+                      href={`${API_BASE_URL}${att.url}`}
+                      download={att.filename}
+                      className="flex h-32 w-full items-center justify-center bg-zinc-800 px-3 py-2 text-center text-xs font-medium text-zinc-300 hover:bg-zinc-700"
+                    >
+                      {att.filename}
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="mt-10">
           <h2 className="text-lg font-semibold">Discussion</h2>
 
@@ -256,6 +301,31 @@ const TicketDetails = () => {
           </div>
         </form>
       </div>
+
+      {/* Image Preview Modal */}
+      {selectedImage && (
+        <div
+          onClick={() => setSelectedImage(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-h-[90vh] max-w-4xl"
+          >
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute -top-10 right-0 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
+            >
+              ✕
+            </button>
+            <img
+              src={selectedImage}
+              alt="Preview"
+              className="max-h-[90vh] max-w-4xl rounded-lg object-contain"
+            />
+          </div>
+        </div>
+      )}
     </main>
   )
 }

@@ -12,11 +12,23 @@ export const createTicket = async (req, res) => {
   }
 
   try {
-    const ticket = new Ticket({
+    const ticketData = {
       title,
       description,
       createdBy: req.user._id,
-    })
+    }
+
+    // attach uploaded files metadata if any
+    if (req.files && req.files.length > 0) {
+      ticketData.attachments = req.files.map((f) => ({
+        filename: f.filename,
+        url: `/uploads/${f.filename}`,
+        mimetype: f.mimetype,
+        size: f.size,
+      }))
+    }
+
+    const ticket = new Ticket(ticketData)
 
     await ticket.save()
 
@@ -24,8 +36,10 @@ export const createTicket = async (req, res) => {
       message: "Ticket created",
     })
   } catch (error) {
+    console.error("Create ticket error:", error)
     res.status(500).json({
       message: "Ticket not created",
+      error: error.message,
     })
   }
 }

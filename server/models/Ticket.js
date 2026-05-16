@@ -10,6 +10,14 @@ const ticketSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    attachments: [
+      {
+        filename: String,
+        url: String,
+        mimetype: String,
+        size: Number,
+      },
+    ],
     status: {
       type: String,
       enum: ["Open", "Pending", "Resolved"],

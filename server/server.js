@@ -29,7 +29,7 @@ const io = new Server(server, {
       if (allowedOrigins.includes(origin)) return callback(null, true)
       return callback(new Error("Not allowed by CORS"))
     },
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   },
 })
@@ -50,7 +50,7 @@ const corsOptions = {
     if (allowedOrigins.includes(origin)) return callback(null, true)
     return callback(new Error("Not allowed by CORS"))
   },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
   credentials: true,
 }
 
@@ -64,6 +64,8 @@ app.use((req, res, next) => {
 
 app.use(cors(corsOptions))
 app.use(express.json())
+// serve uploaded files
+app.use('/uploads', express.static('uploads'))
 app.use("/api/auth", authRoutes)
 app.use("/api/tickets", ticketRoutes)
 app.use("/api/users", usersRoutes)

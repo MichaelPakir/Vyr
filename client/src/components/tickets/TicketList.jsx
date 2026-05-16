@@ -61,26 +61,36 @@ const TicketList = () => {
 
   const handleCreateTicket = async (ticketData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/tickets`, {
+      setError(null)
+      const opts = {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
+      }
+
+      if (ticketData instanceof FormData) {
+        opts.body = ticketData
+        // let browser set Content-Type with boundary
+      } else {
+        opts.headers["Content-Type"] = "application/json"
+        opts.body = JSON.stringify({
           title: ticketData.title,
           description: ticketData.description,
-        }),
-      })
+        })
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/tickets`, opts)
 
       if (!response.ok) {
-        throw new Error("Failed to create ticket")
+        const errorBody = await response.json().catch(() => ({}))
+        throw new Error(errorBody.message || "Failed to create ticket")
       }
 
       setIsFormOpen(false)
-
       await fetchTickets()
     } catch (error) {
+      console.error("Create ticket error:", error)
       setError(error.message)
     }
   }
