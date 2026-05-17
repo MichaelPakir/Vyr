@@ -35,6 +35,12 @@ const TicketDetails = () => {
     return normalizedRole === "admin" || normalizedRole === "superadmin"
   }
 
+  const statusColors = {
+    Open: "border-blue-500/20 bg-blue-500/10 text-blue-300",
+    Pending: "border-yellow-500/20 bg-yellow-500/10 text-yellow-300",
+    Resolved: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
+  }
+
   const fetchTicket = useCallback(async () => {
     try {
       setLoading(true)
@@ -172,6 +178,20 @@ const TicketDetails = () => {
       })
     })
 
+    socket.on("ticketUpdated", (updatedTicket) => {
+      if (updatedTicket.id?.toString() !== id) return
+
+      setTicket((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: updatedTicket.status,
+              updatedAt: updatedTicket.updatedAt,
+            }
+          : prev,
+      )
+    })
+
     return () => {
       socket.disconnect()
     }
@@ -244,6 +264,18 @@ const TicketDetails = () => {
       const data = await res.json()
       const savedComment = data.comment
 
+      if (data.ticket) {
+        setTicket((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: data.ticket.status,
+                updatedAt: data.ticket.updatedAt,
+              }
+            : prev,
+        )
+      }
+
       setComments((prev) => {
         if (prev.some((comment) => comment._id === savedComment._id)) {
           return prev
@@ -258,6 +290,28 @@ const TicketDetails = () => {
       if (replyTextareaRef.current) {
         replyTextareaRef.current.style.height = "96px"
       }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleResolveTicket = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/tickets/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: "Resolved" }),
+      })
+
+      if (!res.ok) {
+        throw new Error("Failed to resolve ticket")
+      }
+
+      const data = await res.json()
+      setTicket(data.ticket)
     } catch (err) {
       console.error(err)
     }
@@ -335,15 +389,41 @@ const TicketDetails = () => {
         )}
 
         <div className="mb-10 border-b border-white/10 pb-8">
-          <p className="text-sm uppercase tracking-widest text-zinc-500">
-            Ticket Details
-          </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">
-            {ticket.title}
-          </h1>
-          <p className="mt-3 text-zinc-400">
-            Full information about this support request.
-          </p>
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p className="text-sm uppercase tracking-widest text-zinc-500">
+                Ticket Details
+              </p>
+              <h1 className="mt-2 text-3xl font-bold tracking-tight">
+                {ticket.title}
+              </h1>
+              <p className="mt-3 text-zinc-400">
+                Full information about this support request.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <span
+                className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                  statusColors[ticket.status] ||
+                  "border-white/10 bg-white/5 text-zinc-300"
+                }`}
+              >
+                {ticket.status}
+              </span>
+
+              {isAdminView && ticket.status !== "Resolved" && (
+                <button
+                  type="button"
+                  onClick={handleResolveTicket}
+                  className="rounded-xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300"
+                >
+                  Mark as Resolved
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="mt-4 flex flex-wrap gap-4 text-sm text-zinc-400">
             {ticket.createdBy && (
               <div>

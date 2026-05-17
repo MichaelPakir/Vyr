@@ -124,6 +124,13 @@ export const updateTicketStatus = async (req, res) => {
   try {
     const { id } = req.params
     const { status } = req.body
+    const allowedStatuses = ["Open", "Pending", "Resolved"]
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid ticket status",
+      })
+    }
 
     const ticket = await Ticket.findById(id)
 
