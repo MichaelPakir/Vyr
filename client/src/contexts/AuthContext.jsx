@@ -1,7 +1,6 @@
-import { createContext, useContext, useState } from "react"
+import { useState } from "react"
 import { loginRequest, registerRequest } from "../services/authService"
-
-const AuthContext = createContext(null)
+import { AuthContext } from "./authContextValue"
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
@@ -46,5 +45,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   )
 }
-
-export const useAuth = () => useContext(AuthContext)

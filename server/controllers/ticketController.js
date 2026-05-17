@@ -48,6 +48,8 @@ export const getMyTickets = async (req, res) => {
     const tickets = await Ticket.find({
       createdBy: req.user._id,
     })
+      .populate("createdBy", "name email role")
+      .sort({ updatedAt: -1 })
 
     return res.status(200).json({
       message: "Fetched tickets",
@@ -68,7 +70,9 @@ export const getAllTickets = async (req, res) => {
       })
     }
 
-    const tickets = await Ticket.find({}).sort({ createdAt: -1 })
+    const tickets = await Ticket.find({})
+      .populate("createdBy", "name email role")
+      .sort({ updatedAt: -1 })
 
     return res.status(200).json({
       message: "Fetched all tickets",

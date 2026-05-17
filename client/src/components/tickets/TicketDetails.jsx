@@ -7,7 +7,7 @@ import {
 } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { io } from "socket.io-client"
-import { useAuth } from "../../contexts/AuthContext"
+import { useAuth } from "../../contexts/useAuth"
 import { API_BASE_URL } from "../../services/apiConfig"
 
 const TicketDetails = () => {
