@@ -60,7 +60,7 @@ server/   Express API, Mongo models/controllers/routes, Socket.IO server
 ### 1. Clone and Install
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/MichaelPakir/Vyr.git
 cd Vyr
 
 cd server
