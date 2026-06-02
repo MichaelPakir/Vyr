@@ -197,16 +197,6 @@ const TicketList = () => {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => void loadTickets()}
-            disabled={loading}
-            className="inline-flex h-11 items-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <span className={loading ? "animate-spin" : ""}>R</span>
-            Refresh
-          </button>
-
-          <button
-            type="button"
             onClick={() => setIsFormOpen(true)}
             className="inline-flex h-11 items-center gap-2 rounded-md bg-white px-4 text-sm font-semibold text-black transition hover:bg-zinc-200 active:scale-[0.98]"
           >
@@ -288,14 +278,12 @@ const TicketList = () => {
               <tbody className="divide-y divide-white/10">
                 {tickets.map((ticket) => {
                   const id = ticket._id || ticket.id
-                  const statusLabel = statusLabels[ticket.status] || ticket.status
+                  const statusLabel =
+                    statusLabels[ticket.status] || ticket.status
                   const priority = ticket.priority || "Urgent"
 
                   return (
-                    <tr
-                      key={id}
-                      className="transition hover:bg-white/[0.03]"
-                    >
+                    <tr key={id} className="transition hover:bg-white/[0.03]">
                       <td className="px-4 py-4">
                         <Link
                           to={`/ticket-details/${id}`}
