@@ -84,9 +84,7 @@ const TicketList = () => {
       void loadTickets()
     }, 0)
 
-    return () => {
-      window.clearTimeout(timeoutId)
-    }
+    return () => window.clearTimeout(timeoutId)
   }, [token, loadTickets])
 
   const handleCreateTicket = async (ticketData) => {
@@ -192,6 +190,7 @@ const TicketList = () => {
 
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={() => setIsFormOpen(true)}
             className="rounded-md bg-white px-4 py-2 text-sm text-black"
           >
@@ -258,13 +257,17 @@ const TicketList = () => {
                         {ticket.title}
                       </Link>
                     </td>
+
                     <td className="px-4 py-4">
                       {renderStatusBadge(ticket.status)}
                     </td>
+
                     <td className="px-4 py-4">
                       {renderPriorityBadge(ticket.priority)}
                     </td>
+
                     <td className="px-4 py-4">{getCustomerName(ticket)}</td>
+
                     <td className="px-4 py-4">
                       {formatDate(ticket.updatedAt || ticket.createdAt)}
                     </td>
