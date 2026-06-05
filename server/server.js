@@ -1,18 +1,19 @@
 import dotenv from "dotenv"
+import express from "express"
+import cors from "cors"
+import { createServer } from "http"
+import { Server } from "socket.io"
+import path from "path"
+
+import connectDB from "./config/db.js"
 import authRoutes from "./routes/authRoutes.js"
 import ticketRoutes from "./routes/ticketRoutes.js"
 import usersRoutes from "./routes/usersRoutes.js"
-import { createServer } from "http"
-import { Server } from "socket.io"
 import { setIO } from "./socket.js"
+
 dotenv.config()
 
-import express from "express"
-import cors from "cors"
-import connectDB from "./config/db.js"
-
 const app = express()
-
 const server = createServer(app)
 
 const CLIENT_URLS = process.env.CLIENT_URLS || "http://localhost:5173"
@@ -64,7 +65,8 @@ app.use((req, res, next) => {
 app.use(cors(corsOptions))
 app.use(express.json())
 
-app.use("/uploads", express.static("uploads"))
+app.use("/uploads", express.static(path.resolve("uploads")))
+
 app.use("/api/auth", authRoutes)
 app.use("/api/tickets", ticketRoutes)
 app.use("/api/users", usersRoutes)
