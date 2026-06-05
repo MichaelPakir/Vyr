@@ -205,9 +205,9 @@ export const assignTicket = async (req, res) => {
       })
     }
 
-    const ticket = await Ticket.findById(id)
+    const ticketExists = await Ticket.exists({ _id: id })
 
-    if (!ticket) {
+    if (!ticketExists) {
       return res.status(404).json({
         message: "Ticket not found",
       })
@@ -215,20 +215,22 @@ export const assignTicket = async (req, res) => {
 
     //Unassign flow
     if (!assigneeId) {
-      ticket.assignedTo = null
-      ticket.assignedBy = null
-      ticket.assignedAt = null
-
-      await ticket.save()
-
-      const unassignedTicket = await Ticket.findById(ticket._id)
+      const unassignedTicket = await Ticket.findByIdAndUpdate(
+        id,
+        {
+          assignedTo: null,
+          assignedBy: null,
+          assignedAt: null,
+        },
+        { new: true },
+      )
         .populate("assignedTo", "name email role")
         .populate("assignedBy", "name email role")
         .populate("createdBy", "name email role")
 
       const io = getIO()
       io.emit("ticketAssigned", {
-        ticketId: ticket._id,
+        ticketId: unassignedTicket._id,
         assignedTo: null,
         assignedBy: null,
         assignedAt: null,
@@ -256,23 +258,25 @@ export const assignTicket = async (req, res) => {
     }
 
     //Assign flow
-    ticket.assignedTo = assignee._id
-    ticket.assignedBy = req.user._id
-    ticket.assignedAt = new Date()
-
-    await ticket.save()
-
-    const updatedTicket = await Ticket.findById(ticket._id)
+    const updatedTicket = await Ticket.findByIdAndUpdate(
+      id,
+      {
+        assignedTo: assignee._id,
+        assignedBy: req.user._id,
+        assignedAt: new Date(),
+      },
+      { new: true },
+    )
       .populate("assignedTo", "name email role")
       .populate("assignedBy", "name email role")
       .populate("createdBy", "name email role")
 
     const io = getIO()
     io.emit("ticketAssigned", {
-      ticketId: ticket._id,
+      ticketId: updatedTicket._id,
       assignedTo: assignee._id,
       assignedBy: req.user._id,
-      assignedAt: ticket.assignedAt,
+      assignedAt: updatedTicket.assignedAt,
     })
 
     return res.status(200).json({

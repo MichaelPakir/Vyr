@@ -23,6 +23,11 @@ const TicketDetails = () => {
   const [selectedImage, setSelectedImage] = useState(null)
   const [showNewRepliesIndicator, setShowNewRepliesIndicator] = useState(false)
 
+  const [admins, setAdmins] = useState([])
+  const [assignedTo, setAssignedTo] = useState(ticket?.assignedTo?._id || "")
+  const [assigning, setAssigning] = useState(false)
+  const [assignMessage, setAssignMessage] = useState("")
+
   const replyTextareaRef = useRef(null)
   const commentsEndRef = useRef(null)
   const isNearBottomRef = useRef(true)
@@ -35,11 +40,16 @@ const TicketDetails = () => {
     return normalizedRole === "admin" || normalizedRole === "superadmin"
   }
 
+  const isSuperAdmin = normalizeRole(user?.role) === "superadmin"
+
   const statusColors = {
     Open: "border-blue-500/20 bg-blue-500/10 text-blue-300",
     Pending: "border-yellow-500/20 bg-yellow-500/10 text-yellow-300",
     Resolved: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
   }
+
+  const getAttachmentUrl = (url) =>
+    url?.startsWith("http") ? url : `${API_BASE_URL}${url}`
 
   const fetchTicket = useCallback(async () => {
     try {
@@ -71,6 +81,7 @@ const TicketDetails = () => {
 
       const data = await res.json()
       setTicket(data.ticket)
+      setAssignedTo(data.ticket?.assignedTo?._id || "")
     } catch (err) {
       setError(err.message || "Unexpected error occurred")
     } finally {
@@ -105,6 +116,32 @@ const TicketDetails = () => {
       console.error(error)
     }
   }, [id, token])
+
+  useEffect(() => {
+    if (!token || !isSuperAdmin) return
+
+    const fetchAdmins = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/users?role=admin`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (!res.ok) throw new Error("Failed to fetch admins")
+
+        const data = await res.json()
+        const adminUsers = (data.users || data).filter(
+          (account) => normalizeRole(account.role) === "admin",
+        )
+        setAdmins(adminUsers)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchAdmins()
+  }, [token, isSuperAdmin])
 
   useEffect(() => {
     if (!token) return
@@ -157,7 +194,6 @@ const TicketDetails = () => {
     if (!token) return
 
     const socket = io(API_BASE_URL, {
-      transports: ["websocket"],
       auth: { token },
     })
 
@@ -317,6 +353,48 @@ const TicketDetails = () => {
     }
   }
 
+  const handleAssignTicket = async (nextAssignedTo) => {
+    if (
+      !isSuperAdmin ||
+      (nextAssignedTo && !admins.some((admin) => admin._id === nextAssignedTo))
+    ) {
+      return
+    }
+
+    const previousAssignedTo = assignedTo
+    setAssignedTo(nextAssignedTo)
+    setAssignMessage("")
+
+    try {
+      setAssigning(true)
+
+      const res = await fetch(`${API_BASE_URL}/api/tickets/${id}/assign`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ assigneeId: nextAssignedTo || null }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to assign ticket")
+      }
+
+      setTicket(data.ticket)
+      setAssignedTo(data.ticket?.assignedTo?._id || "")
+      setAssignMessage("Saved")
+    } catch (err) {
+      setAssignedTo(previousAssignedTo)
+      setAssignMessage(err.message || "Failed to save")
+      console.error(err)
+    } finally {
+      setAssigning(false)
+    }
+  }
+
   const handleJumpToLatest = () => {
     commentsEndRef.current?.scrollIntoView({
       behavior: "smooth",
@@ -424,17 +502,60 @@ const TicketDetails = () => {
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-4 text-sm text-zinc-400">
+          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-zinc-400">
             {ticket.createdBy && (
-              <div>
+              <div className="flex min-h-10 items-center gap-2">
                 <span className="font-medium text-zinc-300">Created by:</span>{" "}
                 {ticket.createdBy.name}
               </div>
             )}
+
             {ticket.createdAt && (
-              <div>
+              <div className="flex min-h-10 items-center gap-2">
                 <span className="font-medium text-zinc-300">Created:</span>{" "}
                 {new Date(ticket.createdAt).toLocaleString()}
+              </div>
+            )}
+
+            {isSuperAdmin && (
+              <div className="flex min-h-10 flex-wrap items-center gap-2">
+                <span className="font-medium text-zinc-300">Assigned to:</span>
+
+                <select
+                  value={assignedTo}
+                  onChange={(e) => handleAssignTicket(e.target.value)}
+                  disabled={assigning || admins.length === 0}
+                  className="rounded-xl border border-white/10 bg-zinc-950 px-3 py-2 text-sm text-white outline-none transition focus:border-white/30 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <option value="">Unassigned</option>
+                  {admins.map((admin) => (
+                    <option key={admin._id} value={admin._id}>
+                      {admin.name}
+                    </option>
+                  ))}
+                </select>
+
+                {assigning && (
+                  <span className="text-xs text-zinc-500">Saving...</span>
+                )}
+
+                {!assigning && assignMessage && (
+                  <span
+                    className={`text-xs ${
+                      assignMessage === "Saved"
+                        ? "text-emerald-300"
+                        : "text-red-300"
+                    }`}
+                  >
+                    {assignMessage}
+                  </span>
+                )}
+
+                {!assigning && admins.length === 0 && (
+                  <span className="text-xs text-zinc-500">
+                    No admins available
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -463,14 +584,14 @@ const TicketDetails = () => {
                   {att.mimetype?.startsWith("image/") ? (
                     <>
                       <img
-                        src={`${API_BASE_URL}${att.url}`}
+                        src={getAttachmentUrl(att.url)}
                         alt={att.filename}
                         className="h-32 w-full object-cover"
                       />
                       <button
                         type="button"
                         onClick={() =>
-                          setSelectedImage(`${API_BASE_URL}${att.url}`)
+                          setSelectedImage(getAttachmentUrl(att.url))
                         }
                         className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 transition group-hover:opacity-100"
                       >
@@ -481,7 +602,7 @@ const TicketDetails = () => {
                     </>
                   ) : (
                     <a
-                      href={`${API_BASE_URL}${att.url}`}
+                      href={getAttachmentUrl(att.url)}
                       download={att.filename}
                       className="flex h-32 w-full items-center justify-center bg-zinc-800 px-3 py-2 text-center text-xs font-medium text-zinc-300 hover:bg-zinc-700"
                     >
