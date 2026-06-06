@@ -26,11 +26,17 @@ const Home = () => {
                 <></>
               ) : (
                 <>
-                  <Link to="/register" className="rounded-2xl bg-white px-6 py-4 font-semibold text-black transition hover:bg-zinc-200">
+                  <Link
+                    to="/register"
+                    className="rounded-2xl bg-white px-6 py-4 font-semibold text-black transition hover:bg-zinc-200"
+                  >
                     Get Started
                   </Link>
 
-                  <Link to="/login" className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 font-semibold text-white transition hover:bg-white/10">
+                  <Link
+                    to="/login"
+                    className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 font-semibold text-white transition hover:bg-white/10"
+                  >
                     Login
                   </Link>
                 </>
@@ -67,12 +73,15 @@ const Home = () => {
                 desc: "Enable teams to work together seamlessly.",
               },
               {
-                icon: "📊",
-                title: "Insights & Analytics",
-                desc: "Track performance and response metrics.",
+                icon: "🔐",
+                title: "Role-Based Access",
+                desc: "Separate views and permissions for users, admins, and superadmins.",
               },
             ].map((feature) => (
-              <div key={feature.title} className="rounded-3xl border border-white/10 bg-zinc-900 p-8 transition hover:border-white/20 hover:bg-zinc-900/70">
+              <div
+                key={feature.title}
+                className="rounded-3xl border border-white/10 bg-zinc-900 p-8 transition hover:border-white/20 hover:bg-zinc-900/70"
+              >
                 <div className="text-4xl">{feature.icon}</div>
 
                 <h3 className="mt-6 text-2xl font-semibold">{feature.title}</h3>
