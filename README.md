@@ -122,6 +122,7 @@ npm run dev
 - `GET /api/tickets/:id` (auth)
 - `GET /api/tickets` (admin/superadmin)
 - `PUT /api/tickets/:id` (admin/superadmin)
+- `PATCH /api/tickets/:id/assign` (superadmin) — assign or unassign a ticket. Request JSON: `{ "assigneeId": "<adminUserId>" }` to assign, or `{ "assigneeId": null }` / empty body to unassign.
 
 ### Comments
 
@@ -140,6 +141,15 @@ Client subscribes to Socket.IO events:
 
 - `newComment`
 - `ticketUpdated`
+- `ticketAssigned` — emitted when a ticket is assigned or unassigned. Payload example:
+  ```json
+  {
+    "ticketId": "<ticketId>",
+    "assignedTo": "<adminUserId|null>",
+    "assignedBy": "<superadminUserId|null>",
+    "assignedAt": "<ISO timestamp|null>"
+  }
+  ```
 
 This enables live conversation and status synchronization without page refreshes.
 
