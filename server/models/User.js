@@ -2,9 +2,10 @@ import mongoose from "mongoose"
 
 const UserSchema = new mongoose.Schema(
   {
+    firebaseUid: { type: String, unique: true, sparse: true },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String },
     role: {
       type: String,
       enum: ["user", "admin", "superadmin"],

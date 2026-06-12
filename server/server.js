@@ -1,4 +1,4 @@
-import dotenv from "dotenv"
+import "./config/env.js"
 import express from "express"
 import cors from "cors"
 import { createServer } from "http"
@@ -10,8 +10,6 @@ import authRoutes from "./routes/authRoutes.js"
 import ticketRoutes from "./routes/ticketRoutes.js"
 import usersRoutes from "./routes/usersRoutes.js"
 import { setIO } from "./socket.js"
-
-dotenv.config()
 
 const app = express()
 const server = createServer(app)
@@ -37,7 +35,6 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`)
-
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.id}`)
   })
@@ -62,8 +59,18 @@ app.use((req, res, next) => {
   next()
 })
 
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups")
+  next()
+})
+
 app.use(cors(corsOptions))
 app.use(express.json())
+
+app.use((req, res, next) => {
+  console.log("REQUEST:", req.method, req.url)
+  next()
+})
 
 app.use("/uploads", express.static(path.resolve("uploads")))
 

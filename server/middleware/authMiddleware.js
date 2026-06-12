@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken"
 import User from "../models/User.js"
+import { auth } from "../config/firebaseAdmin.js"
 
 const roleAccess =
   (...allowedRoles) =>
@@ -29,22 +30,40 @@ export const protect = async (req, res, next) => {
     try {
       token = req.headers.authorization.split(" ")[1]
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET)
+      try {
+        const decodedFirebaseToken = await auth.verifyIdToken(token)
+        const email = decodedFirebaseToken.email
 
-      req.user = await User.findById(decoded.id).select("-password")
+        if (!email) {
+          return res.status(401).json({ message: "Not authorized" })
+        }
 
-      next()
+        req.user = await User.findOneAndUpdate(
+          { email },
+          {
+            $set: {
+              firebaseUid: decodedFirebaseToken.uid,
+              name: decodedFirebaseToken.name || email.split("@")[0],
+              email,
+            },
+          },
+          { new: true, upsert: true, setDefaultsOnInsert: true },
+        ).select("-password")
+
+        return next()
+      } catch (firebaseError) {
+        // Firebase verification failed, fall back to JWT
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        req.user = await User.findById(decoded.id).select("-password")
+        return next()
+      }
     } catch (error) {
-      return res.status(401).json({
-        message: "Not authorized",
-      })
+      return res.status(401).json({ message: "Not authorized" })
     }
   }
 
   if (!token) {
-    return res.status(401).json({
-      message: "Not authorized, no token",
-    })
+    return res.status(401).json({ message: "Not authorized, no token" })
   }
 }
 
