@@ -1,46 +1,90 @@
-import { useState } from "react"
-import { loginRequest, registerRequest } from "../services/authService"
+import { useEffect, useState } from "react"
+import { onAuthStateChanged } from "firebase/auth"
+import { auth } from "../firebase"
+import {
+  getCurrentUserRequest,
+  loginRequest,
+  loginWithGoogleRequest,
+  logoutRequest,
+  registerRequest,
+} from "../services/authService"
 import { AuthContext } from "./authContextValue"
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem("user")
+  const [user, setUser] = useState(null)
+  const [token, setToken] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-    return storedUser ? JSON.parse(storedUser) : null
-  })
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        setUser(null)
+        setToken(null)
+        setLoading(false)
+        return
+      }
 
-  const [token, setToken] = useState(() => localStorage.getItem("token"))
+      try {
+        const idToken = await firebaseUser.getIdToken()
+        const appUser = await getCurrentUserRequest(idToken)
+
+        setUser(appUser)
+        setToken(idToken)
+      } catch (error) {
+        console.error(error)
+        setUser(null)
+        setToken(null)
+      } finally {
+        setLoading(false)
+      }
+    })
+
+    return unsubscribe
+  }, [])
 
   const register = async (formData) => {
-    const response = await registerRequest(formData)
+    const firebaseUser = await registerRequest(formData)
+    const idToken = await firebaseUser.getIdToken(true)
+    const appUser = await getCurrentUserRequest(idToken)
 
-    return response.user
+    setUser(appUser)
+    setToken(idToken)
+
+    return appUser
   }
 
   const login = async (credentials) => {
-    const response = await loginRequest(credentials)
-    const authenticatedUser = response.user
-    const authToken = response.token
+    // loginRequest now returns { user, token } from MongoDB directly
+    const { user, token } = await loginRequest(credentials)
 
-    setUser(authenticatedUser)
-    setToken(authToken)
+    setUser(user)
+    setToken(token)
 
-    localStorage.setItem("user", JSON.stringify(authenticatedUser))
-    localStorage.setItem("token", authToken)
+    return user
+  }
 
-    return authenticatedUser
+  const loginWithGoogle = async () => {
+    const firebaseUser = await loginWithGoogleRequest()
+    const idToken = await firebaseUser.getIdToken()
+    const appUser = await getCurrentUserRequest(idToken)
+
+    setUser(appUser)
+    setToken(idToken)
+
+    return appUser
   }
 
   const logout = async () => {
+    await logoutRequest()
+
     setUser(null)
     setToken(null)
-
-    localStorage.removeItem("user")
-    localStorage.removeItem("token")
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, register, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, token, loading, register, login, loginWithGoogle, logout }}
+    >
       {children}
     </AuthContext.Provider>
   )

@@ -1,4 +1,3 @@
-// middleware/verifyFirebaseToken.js
 import { auth } from "../config/firebaseAdmin.js"
 import User from "../models/User.js"
 
